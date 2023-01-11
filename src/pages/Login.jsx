@@ -29,6 +29,16 @@ export default class Login extends Component {
     history.push('/settings');
   };
 
+  playGetToken = async () => {
+    const requestAPI = await fetch('https://opentdb.com/api_token.php?command=request');
+    const jsonAPI = await requestAPI.json();
+    const { token } = jsonAPI;
+    localStorage.token = token;
+    
+    const { history } = this.props;
+    history.push('/game');
+  };
+
   render() {
     const { name, email, isDisable } = this.state;
     return (
@@ -57,7 +67,7 @@ export default class Login extends Component {
             type="button"
             disabled={ isDisable }
             data-testid="btn-play"
-            onClick={ this.validateAll }
+            onClick={ this.playGetToken }
           >
             Entrar
           </button>
@@ -67,6 +77,8 @@ export default class Login extends Component {
             onClick={ this.handleSettings }
           >
             Configuração
+          >
+            Play
           </button>
         </label>
       </div>
