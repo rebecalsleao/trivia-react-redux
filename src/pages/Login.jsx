@@ -34,7 +34,7 @@ export default class Login extends Component {
     const jsonAPI = await requestAPI.json();
     const { token } = jsonAPI;
     localStorage.token = token;
-    
+
     const { history } = this.props;
     history.push('/game');
   };
@@ -69,7 +69,7 @@ export default class Login extends Component {
             data-testid="btn-play"
             onClick={ this.playGetToken }
           >
-            Entrar
+            Play
           </button>
           <button
             type="button"
@@ -77,8 +77,6 @@ export default class Login extends Component {
             onClick={ this.handleSettings }
           >
             Configuração
-          >
-            Play
           </button>
         </label>
       </div>
