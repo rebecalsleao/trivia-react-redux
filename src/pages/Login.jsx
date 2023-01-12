@@ -18,7 +18,6 @@ class Login extends Component {
 
   validateAll = () => {
     const { name, email } = this.state;
-
     if (name.length > 0 && email.length > 0) {
       this.setState({ isDisable: false });
     } else {
@@ -39,15 +38,13 @@ class Login extends Component {
     const { name, email } = this.state;
 
     localStorage.token = token;
-
-    const { history } = this.props;
+    dispatch(saveUser({ name, email }));
     history.push('/game');
   };
 
   render() {
     const { name, email, isDisable } = this.state;
     return (
-
       <div>
         <label htmlFor="name">
           <input
