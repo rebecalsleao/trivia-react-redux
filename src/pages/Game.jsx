@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { Redirect } from 'react-router-dom';
 import Header from '../components/Header';
+import '../style/Game.css';
 
 export default class Game extends Component {
   state = {
@@ -83,14 +84,14 @@ export default class Game extends Component {
 
   renderAnswers = (answers) => {
     const { correctAnswer } = this.state;
-    const num = -1;
+    const num = 0;
     let index = num;
 
     return answers.map((answer, i) => {
       if (answer === correctAnswer) {
         return (
           <button
-            className="wrong"
+            className="correct-answer"
             key={ i }
             type="button"
             onClick={ this.nextQuestion }
@@ -100,10 +101,10 @@ export default class Game extends Component {
             { answer }
           </button>);
       }
-      index += 1;
+      index = +1;
       return (
         <button
-          className="correct-answer"
+          className="wrong"
           type="button"
           onClick={ this.nextQuestion }
           id="incorrect-answer"

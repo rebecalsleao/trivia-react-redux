@@ -1,5 +1,5 @@
 .game {
-  background: linear-gradient(180deg, #3C1B7A 0%, #000000 100%);
+  background: white;
   color: white;
 }
 
@@ -8,7 +8,6 @@
 }
 
 .wrong {
-  border: 3px solid red
+  border: 3px solid red;
 }
 
-etste
