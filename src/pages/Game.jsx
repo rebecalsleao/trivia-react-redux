@@ -119,7 +119,7 @@ export default class Game extends Component {
     const correctAnswer = 'correct-answer';
     const incorrectAnswer = 'incorrect-answer';
     if (target.id === correctAnswer) {
-      console.log('qualquer');
+      console.log('qualquer1');
     }
     const correctButton = document.getElementById(correctAnswer);
     correctButton.className = correctAnswer;
