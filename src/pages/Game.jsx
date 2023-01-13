@@ -91,7 +91,6 @@ export default class Game extends Component {
       if (answer === correctAnswer) {
         return (
           <button
-            className="correct-answer"
             key={ i }
             type="button"
             onClick={ this.nextQuestion }
@@ -104,10 +103,10 @@ export default class Game extends Component {
       index = +1;
       return (
         <button
-          className="wrong"
           type="button"
           onClick={ this.nextQuestion }
           id="incorrect-answer"
+          name="incorrect-answer"
           data-testid={ `wrong-answer-${index}` }
           key={ i }
         >
@@ -116,13 +115,27 @@ export default class Game extends Component {
     });
   };
 
-  nextQuestion = ({ target }) => {
-    if (target.id === 'correct-answer') {
-      console.log('correto');
+  nextQuestion = async ({ target }) => {
+    const correctAnswer = 'correct-answer';
+    const incorrectAnswer = 'incorrect-answer';
+    if (target.id === correctAnswer) {
+      console.log('qualquer');
     }
-    this.setState((prevState) => { prevState.question += 1; }, () => {
-      this.createAnswers();
-    });
+    const correctButton = document.getElementById(correctAnswer);
+    correctButton.className = correctAnswer;
+    const incorrectButton = document.getElementsByName(incorrectAnswer);
+    const buttonArray = Array.from(incorrectButton);
+    if (incorrectButton[0] !== undefined) {
+      for (let i = 0; i < buttonArray.length; i += 1) {
+        buttonArray[i].className = 'wrong';
+      }
+    }
+
+    setTimeout(() => {
+      this.setState((prevState) => { prevState.question += 1; }, () => {
+        this.createAnswers();
+      });
+    }, '2000');
   };
 
   render() {
