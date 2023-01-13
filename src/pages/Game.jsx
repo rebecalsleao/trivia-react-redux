@@ -90,6 +90,7 @@ export default class Game extends Component {
       if (answer === correctAnswer) {
         return (
           <button
+            className="wrong"
             key={ i }
             type="button"
             onClick={ this.nextQuestion }
@@ -102,6 +103,7 @@ export default class Game extends Component {
       index += 1;
       return (
         <button
+          className="correct-answer"
           type="button"
           onClick={ this.nextQuestion }
           id="incorrect-answer"
