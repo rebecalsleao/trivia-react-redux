@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { Redirect } from 'react-router-dom';
 import Header from '../components/Header';
+import '../style/Game.css';
 
 export default class Game extends Component {
   state = {
@@ -83,7 +84,7 @@ export default class Game extends Component {
 
   renderAnswers = (answers) => {
     const { correctAnswer } = this.state;
-    const num = -1;
+    const num = 0;
     let index = num;
 
     return answers.map((answer, i) => {
@@ -99,12 +100,13 @@ export default class Game extends Component {
             { answer }
           </button>);
       }
-      index += 1;
+      index = +1;
       return (
         <button
           type="button"
           onClick={ this.nextQuestion }
           id="incorrect-answer"
+          name="incorrect-answer"
           data-testid={ `wrong-answer-${index}` }
           key={ i }
         >
@@ -113,13 +115,27 @@ export default class Game extends Component {
     });
   };
 
-  nextQuestion = ({ target }) => {
-    if (target.id === 'correct-answer') {
-      console.log('correto');
+  nextQuestion = async ({ target }) => {
+    const correctAnswer = 'correct-answer';
+    const incorrectAnswer = 'incorrect-answer';
+    if (target.id === correctAnswer) {
+      console.log('qualquer1');
     }
-    this.setState((prevState) => { prevState.question += 1; }, () => {
-      this.createAnswers();
-    });
+    const correctButton = document.getElementById(correctAnswer);
+    correctButton.className = correctAnswer;
+    const incorrectButton = document.getElementsByName(incorrectAnswer);
+    const buttonArray = Array.from(incorrectButton);
+    if (incorrectButton[0] !== undefined) {
+      for (let i = 0; i < buttonArray.length; i += 1) {
+        buttonArray[i].className = 'wrong';
+      }
+    }
+
+    setTimeout(() => {
+      this.setState((prevState) => { prevState.question += 1; }, () => {
+        this.createAnswers();
+      });
+    }, '2000');
   };
 
   render() {
