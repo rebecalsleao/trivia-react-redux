@@ -7,6 +7,8 @@ export default class Game extends Component {
     api: {},
     error: false,
     question: 0,
+    correctAnswer: '',
+    answers: [],
   };
 
   componentDidMount() {
@@ -18,33 +20,56 @@ export default class Game extends Component {
     const url = `https://opentdb.com/api.php?amount=5&token=${token}`;
     const response = await fetch(url);
     const api = await response.json();
-    console.log(api);
     this.validateToken(api);
-    this.setState({
-      api,
-    });
   };
 
   validateToken = (api) => {
-    const ERRORCODE = 3;
-    if (api.response_code === ERRORCODE) {
+    const ERROR_CODE = 3;
+    console.log(api.response_code);
+    if (api.response_code === ERROR_CODE) {
+      console.log('erro');
       localStorage.removeItem('token');
       this.setState({
         error: true,
       });
+    } else {
+      this.setState({ api }, () => {
+        this.createAnswers();
+      });
     }
   };
 
+  createAnswers = () => {
+    const { api: { results }, question } = this.state;
+    console.log(results[question]);
+    if (results[question].type === 'multiple') {
+      this.multipleAnswers();
+    } else {
+      this.boolAnswers();
+    }
+  };
+
+  boolAnswers = () => {
+    const { api: { results }, question } = this.state;
+    const { correct_answer: correctAnswer } = results[question];
+    const answers = ['True', 'False'];
+    this.setState({ correctAnswer }, this.randomArray(answers));
+  };
+
   multipleAnswers = () => {
-    const { api } = this.state;
-    const { results } = api;
-    const answers = results[0].incorrect_answers;
-    answers.push(results[0].correct_answer);
+    const { api: { results }, question } = this.state;
+    const { correct_answer: correctAnswer } = results[question];
+    const answers = results[question].incorrect_answers;
+    answers.push(correctAnswer);
+    this.setState({ correctAnswer }, this.randomArray(answers));
+  };
+
+  randomArray = (answers) => {
+    const REPEAT = answers.length;
+    const THREE = 3;
     const randomAnswers = [];
-    const NUMFOUR = 4;
-    const NUMTHREE = 3;
-    for (let i = 0; i < NUMFOUR; i += 1) {
-      const num = Math.floor(Math.random() * NUMTHREE);
+    for (let i = 0; i < REPEAT; i += 1) {
+      const num = Math.floor(Math.random() * THREE);
       if (num === 0) {
         const shiftAnswer = answers.shift();
         randomAnswers.push(shiftAnswer);
@@ -53,14 +78,22 @@ export default class Game extends Component {
         randomAnswers.push(popAnswer);
       }
     }
+    this.setState({ answers: randomAnswers });
+  };
+
+  renderAnswers = (answers) => {
+    const { correctAnswer } = this.state;
     const num = -1;
     let index = num;
-    return randomAnswers.map((answer, i) => {
-      if (answer === results[0].correct_answer) {
+
+    return answers.map((answer, i) => {
+      if (answer === correctAnswer) {
         return (
           <button
             key={ i }
             type="button"
+            onClick={ this.nextQuestion }
+            id="correct-answer"
             data-testid="correct-answer"
           >
             { answer }
@@ -70,6 +103,8 @@ export default class Game extends Component {
       return (
         <button
           type="button"
+          onClick={ this.nextQuestion }
+          id="incorrect-answer"
           data-testid={ `wrong-answer-${index}` }
           key={ i }
         >
@@ -78,26 +113,35 @@ export default class Game extends Component {
     });
   };
 
+  nextQuestion = ({ target }) => {
+    if (target.id === 'correct-answer') {
+      console.log('correto');
+    }
+    this.setState((prevState) => { prevState.question += 1; }, () => {
+      this.createAnswers();
+    });
+  };
+
   render() {
-    const { api, error, question, randomAnswers } = this.state;
+    const { api, error, answers, question } = this.state;
     return (
       <div>
-        { error && <Redirect path="/" /> }
-        <Header />
-        <div>
-          <p data-testid="question-category">
-            { api.results && api.results[0].category }
-          </p>
-          <p data-testid="question-text">
-            { api.results && api.results[0].question }
-          </p>
-          <div data-testid="answer-options">
-            { api.results
-            && (api.results[0].type === 'multiple'
-              ? this.multipleAnswers()
-              : <p>Boolean</p>) }
-          </div>
-        </div>
+        { error
+          ? <Redirect to="/" />
+          : (
+            <div>
+              <Header />
+              <p data-testid="question-category">
+                { api.results && api.results[question].category }
+              </p>
+              <p data-testid="question-text">
+                { api.results && api.results[question].question }
+              </p>
+              <div data-testid="answer-options">
+                {this.renderAnswers(answers)}
+              </div>
+            </div>
+          )}
       </div>
     );
   }
