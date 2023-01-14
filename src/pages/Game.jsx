@@ -10,10 +10,18 @@ export default class Game extends Component {
     question: 0,
     correctAnswer: '',
     answers: [],
+    timer: 30,
+    intervalTimeId: '',
   };
 
   componentDidMount() {
     this.getQuestion();
+    this.countingTimeStart();
+  }
+
+  componentDidUpdate() {
+    const { timer } = this.state;
+    if (timer === 0) this.endTimer();
   }
 
   getQuestion = async () => {
@@ -138,6 +146,38 @@ export default class Game extends Component {
     }, '2000');
   };
 
+  countingTimeStart = () => {
+    const { timer, intervalTimeId } = this.state;
+    const intervalTime = 1000;
+
+    if (intervalTimeId) {
+      this.setState({ timer: 30, intervalTimeId: '' });
+    }
+
+    if (timer === 0) {
+      this.setState({ timer: 30, intervalTimeId: '' });
+    }
+
+    const timerCount = setInterval(() => {
+      this.setState((prevState) => ({
+        ...prevState,
+        timer: prevState.timer - 1,
+        intervalTimeId: timerCount,
+      }));
+    }, intervalTime);
+  };
+
+  handleCountTime = () => {
+    const { timer } = this.state;
+    const timeLimit = 0;
+    if (timer === timeLimit) return true;
+  };
+
+  endTimer = () => {
+    const { intervalTimeId } = this.state;
+    clearInterval(intervalTimeId);
+  };
+
   render() {
     const { api, error, answers, question } = this.state;
     return (
@@ -158,6 +198,8 @@ export default class Game extends Component {
               </div>
             </div>
           )}
+        isDisabled=
+        { this.handleCountTime() }
       </div>
     );
   }
