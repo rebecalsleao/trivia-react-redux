@@ -10,10 +10,14 @@ export default class Game extends Component {
     question: 0,
     correctAnswer: '',
     answers: [],
+    timer: 30,
+    showResults: false,
+    isDisabled: false,
   };
 
   componentDidMount() {
     this.getQuestion();
+    this.counter();
   }
 
   getQuestion = async () => {
@@ -42,7 +46,7 @@ export default class Game extends Component {
 
   createAnswers = () => {
     const { api: { results }, question } = this.state;
-    console.log(results[question]);
+    this.setState({ showResults: false });
     if (results[question].type === 'multiple') {
       this.multipleAnswers();
     } else {
@@ -83,7 +87,7 @@ export default class Game extends Component {
   };
 
   renderAnswers = (answers) => {
-    const { correctAnswer } = this.state;
+    const { correctAnswer, showResults, isDisabled } = this.state;
     const num = 0;
     let index = num;
 
@@ -93,9 +97,11 @@ export default class Game extends Component {
           <button
             key={ i }
             type="button"
+            className={ showResults ? 'correct-answer' : '' }
             onClick={ this.nextQuestion }
             id="correct-answer"
             data-testid="correct-answer"
+            disabled={ isDisabled }
           >
             { answer }
           </button>);
@@ -105,10 +111,12 @@ export default class Game extends Component {
         <button
           type="button"
           onClick={ this.nextQuestion }
+          className={ showResults ? 'wrong' : '' }
           id="incorrect-answer"
           name="incorrect-answer"
           data-testid={ `wrong-answer-${index}` }
           key={ i }
+          disabled={ isDisabled }
         >
           { answer }
         </button>);
@@ -116,20 +124,8 @@ export default class Game extends Component {
   };
 
   nextQuestion = async ({ target }) => {
-    const correctAnswer = 'correct-answer';
-    const incorrectAnswer = 'incorrect-answer';
-    if (target.id === correctAnswer) {
-      console.log('qualquer1');
-    }
-    const correctButton = document.getElementById(correctAnswer);
-    correctButton.className = correctAnswer;
-    const incorrectButton = document.getElementsByName(incorrectAnswer);
-    const buttonArray = Array.from(incorrectButton);
-    if (incorrectButton[0] !== undefined) {
-      for (let i = 0; i < buttonArray.length; i += 1) {
-        buttonArray[i].className = 'wrong';
-      }
-    }
+    this.setState({ showResults: true });
+    console.log(target);
 
     setTimeout(() => {
       this.setState((prevState) => { prevState.question += 1; }, () => {
@@ -138,10 +134,29 @@ export default class Game extends Component {
     }, '2000');
   };
 
+  timeOut = () => {
+    this.setState({ isDisabled: true });
+  };
+
+  counter = () => {
+    const ONE = 1000;
+    const DURATION = 30;
+    let timer = DURATION;
+    setInterval(() => {
+      timer -= 1;
+      if (timer < 1) {
+        timer = 0;
+        this.timeOut();
+      }
+      this.setState({ timer });
+    }, ONE);
+  };
+
   render() {
-    const { api, error, answers, question } = this.state;
+    const { api, error, answers, question, timer } = this.state;
     return (
       <div>
+        <p>{timer}</p>
         { error
           ? <Redirect to="/" />
           : (
