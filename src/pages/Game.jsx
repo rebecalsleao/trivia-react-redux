@@ -11,17 +11,13 @@ export default class Game extends Component {
     correctAnswer: '',
     answers: [],
     timer: 30,
-    intervalTimeId: '',
+    showResults: false,
+    isDisabled: false,
   };
 
   componentDidMount() {
     this.getQuestion();
-    this.countingTimeStart();
-  }
-
-  componentDidUpdate() {
-    const { timer } = this.state;
-    if (timer === 0) this.endTimer();
+    this.counter();
   }
 
   getQuestion = async () => {
@@ -50,7 +46,7 @@ export default class Game extends Component {
 
   createAnswers = () => {
     const { api: { results }, question } = this.state;
-    console.log(results[question]);
+    this.setState({ showResults: false });
     if (results[question].type === 'multiple') {
       this.multipleAnswers();
     } else {
@@ -91,7 +87,7 @@ export default class Game extends Component {
   };
 
   renderAnswers = (answers) => {
-    const { correctAnswer } = this.state;
+    const { correctAnswer, showResults, isDisabled } = this.state;
     const num = 0;
     let index = num;
 
@@ -101,9 +97,11 @@ export default class Game extends Component {
           <button
             key={ i }
             type="button"
+            className={ showResults ? 'correct-answer' : '' }
             onClick={ this.nextQuestion }
             id="correct-answer"
             data-testid="correct-answer"
+            disabled={ isDisabled }
           >
             { answer }
           </button>);
@@ -113,10 +111,12 @@ export default class Game extends Component {
         <button
           type="button"
           onClick={ this.nextQuestion }
+          className={ showResults ? 'wrong' : '' }
           id="incorrect-answer"
           name="incorrect-answer"
           data-testid={ `wrong-answer-${index}` }
           key={ i }
+          disabled={ isDisabled }
         >
           { answer }
         </button>);
@@ -124,20 +124,8 @@ export default class Game extends Component {
   };
 
   nextQuestion = async ({ target }) => {
-    const correctAnswer = 'correct-answer';
-    const incorrectAnswer = 'incorrect-answer';
-    if (target.id === correctAnswer) {
-      console.log('qualquer1');
-    }
-    const correctButton = document.getElementById(correctAnswer);
-    correctButton.className = correctAnswer;
-    const incorrectButton = document.getElementsByName(incorrectAnswer);
-    const buttonArray = Array.from(incorrectButton);
-    if (incorrectButton[0] !== undefined) {
-      for (let i = 0; i < buttonArray.length; i += 1) {
-        buttonArray[i].className = 'wrong';
-      }
-    }
+    this.setState({ showResults: true });
+    console.log(target);
 
     setTimeout(() => {
       this.setState((prevState) => { prevState.question += 1; }, () => {
@@ -146,42 +134,29 @@ export default class Game extends Component {
     }, '2000');
   };
 
-  countingTimeStart = () => {
-    const { timer, intervalTimeId } = this.state;
-    const intervalTime = 1000;
-
-    if (intervalTimeId) {
-      this.setState({ timer: 30, intervalTimeId: '' });
-    }
-
-    if (timer === 0) {
-      this.setState({ timer: 30, intervalTimeId: '' });
-    }
-
-    const timerCount = setInterval(() => {
-      this.setState((prevState) => ({
-        ...prevState,
-        timer: prevState.timer - 1,
-        intervalTimeId: timerCount,
-      }));
-    }, intervalTime);
+  timeOut = () => {
+    this.setState({ isDisabled: true });
   };
 
-  handleCountTime = () => {
-    const { timer } = this.state;
-    const timeLimit = 0;
-    if (timer === timeLimit) return true;
-  };
-
-  endTimer = () => {
-    const { intervalTimeId } = this.state;
-    clearInterval(intervalTimeId);
+  counter = () => {
+    const ONE = 1000;
+    const DURATION = 30;
+    let timer = DURATION;
+    setInterval(() => {
+      timer -= 1;
+      if (timer < 1) {
+        timer = 0;
+        this.timeOut();
+      }
+      this.setState({ timer });
+    }, ONE);
   };
 
   render() {
-    const { api, error, answers, question } = this.state;
+    const { api, error, answers, question, timer } = this.state;
     return (
       <div>
+        <p>{timer}</p>
         { error
           ? <Redirect to="/" />
           : (
@@ -198,8 +173,6 @@ export default class Game extends Component {
               </div>
             </div>
           )}
-        isDisabled=
-        { this.handleCountTime() }
       </div>
     );
   }
