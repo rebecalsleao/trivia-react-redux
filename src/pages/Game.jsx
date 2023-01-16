@@ -1,9 +1,14 @@
+import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { Redirect } from 'react-router-dom';
+import { connect } from 'react-redux';
 import Header from '../components/Header';
 import '../style/Game.css';
+import { saveScore } from '../Redux/actions';
 
-export default class Game extends Component {
+let timerID = null;
+
+class Game extends Component {
   state = {
     api: {},
     error: false,
@@ -13,6 +18,8 @@ export default class Game extends Component {
     timer: 30,
     showResults: false,
     isDisabled: false,
+    score: 0,
+    assertions: 0,
   };
 
   componentDidMount() {
@@ -123,9 +130,60 @@ export default class Game extends Component {
     });
   };
 
+  calculateScore = () => {
+    const { api, question, timer, score } = this.state;
+    const { difficulty } = api.results[question];
+    let result = score;
+    const EASY = 1;
+    const MEDIUM = 2;
+    const HARD = 3;
+    const correctAnswerScore = 10;
+
+    this.setState((prevState) => ({
+      assertions: prevState.assertions + 1,
+    }));
+
+    switch (difficulty) {
+    case 'easy':
+      result = correctAnswerScore + (EASY * timer);
+      this.setState({
+        score: result,
+      });
+      break;
+
+    case 'medium':
+      result = correctAnswerScore + (MEDIUM * timer);
+      this.setState({
+        score: result,
+      });
+      break;
+
+    case 'hard':
+      result = correctAnswerScore + (HARD * timer);
+      this.setState({
+        score: result,
+      });
+      break;
+
+    default:
+      break;
+    }
+    this.dispatcher();
+  };
+
+  dispatcher = () => {
+    const { score, assertions } = this.state;
+    const { dispatch } = this.props;
+
+    dispatch(saveScore(score, assertions));
+  };
+
   nextQuestion = async ({ target }) => {
     this.setState({ showResults: true });
-    console.log(target);
+    window.clearInterval(timerID);
+    if (target.id === 'correct-answer') {
+      this.calculateScore();
+    }
 
     setTimeout(() => {
       this.setState((prevState) => { prevState.question += 1; }, () => {
@@ -139,10 +197,12 @@ export default class Game extends Component {
   };
 
   counter = () => {
+    const { showResults } = this.state;
     const ONE = 1000;
     const DURATION = 30;
     let timer = DURATION;
-    setInterval(() => {
+    console.log(showResults);
+    timerID = setInterval(() => {
       timer -= 1;
       if (timer < 1) {
         timer = 0;
@@ -177,3 +237,9 @@ export default class Game extends Component {
     );
   }
 }
+
+Game.propTypes = {
+  dispatch: PropTypes.func.isRequired,
+};
+
+export default connect()(Game);
